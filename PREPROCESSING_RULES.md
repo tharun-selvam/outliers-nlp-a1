@@ -1,8 +1,5 @@
 # Part 1 Preprocessing Decisions
 
-These are the preprocessing choices that affect the final tokens and should be
-reviewed before implementation.
-
 | Area | Chosen rule | Example or effect |
 | --- | --- | --- |
 | Fields | Process `.T` and `.W`; preserve `.I`; ignore `.A` and `.B`. | Only titles and abstracts contribute tokens. |
