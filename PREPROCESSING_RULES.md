@@ -11,9 +11,10 @@
 | Valid tokens | Keep words, integers, and decimals matching `[a-z]+|\d+(?:\.\d+)?`. | Other punctuation is discarded. |
 | Short tokens | Keep single-character tokens unless they are stop words. | Scientific variables such as `x` and `y` remain. |
 | Repeated tokens | Preserve token order and repetitions. | The indexing stage will deduplicate document IDs. |
-| Stemmer | Use the checked-in Python 3 `porter.py`. | The same implementation must process documents, stop words, and queries. |
+| Stemmer | Use the checked-in Python 3 `outliers_porter.py`. | The same implementation must process documents, stop words, and queries. |
 | Stop words | Use the corrected `stopwords.txt`; stem its words before building the stop-word set. | `computer` stems to `comput`, so `comput` is removed after stemming. |
-| Output | Write `<groupname>_processed.all` using `.I <docid>`, followed by `.S` and the processed tokens. | One output block is written for each document. |
+| Files | Use `cran.all.1400` and `stopwords.txt` by default; write `outliers_processed.all`. | Run `outliers_preprocess.py` without arguments. |
+| Output format | Write `.I <docid>`, followed by `.S` and the processed tokens. | One output block is written for each document. |
 
 ## Dataset-specific parsing decision
 

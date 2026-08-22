@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # 
 # Copyright (c) 2002 Vivake Gupta (vivake@omniscia.org).  All rights reserved.
 # Python 3 modernization (c) 2026 - mechanical port of Vivake Gupta's original;

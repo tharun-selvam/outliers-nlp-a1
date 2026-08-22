@@ -7,10 +7,14 @@ import unicodedata
 from pathlib import Path
 from typing import Iterable
 
-from porter import PorterStemmer
+from outliers_porter import PorterStemmer
 
 
 BASE_DIR = Path(__file__).resolve().parent
+GROUP_NAME = "outliers"
+DEFAULT_INPUT = BASE_DIR / "cran.all.1400"
+DEFAULT_STOPWORDS = BASE_DIR / "stopwords.txt"
+DEFAULT_OUTPUT = BASE_DIR / f"{GROUP_NAME}_processed.all"
 EXPECTED_DOCUMENT_IDS = list(range(1, 1401))
 DOCUMENT_ID_RE = re.compile(r"\.I\s+(\d+)")
 THOUSANDS_COMMA_RE = re.compile(r"(?<=\d),(?=\d{3}(?:\D|$))")
@@ -187,16 +191,10 @@ def preprocess_collection(
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Preprocess the Cranfield collection.")
-    parser.add_argument("group_name", help="prefix used for the default output filename")
-    parser.add_argument("--input", type=Path, default=BASE_DIR / "cran.all.1400")
-    parser.add_argument("--stopwords", type=Path, default=BASE_DIR / "stopwords.txt")
-    parser.add_argument("--output", type=Path)
-    args = parser.parse_args(argv)
-    if not re.fullmatch(r"[A-Za-z0-9_-]+", args.group_name):
-        parser.error("group_name may contain only letters, digits, underscores, and hyphens")
-    if args.output is None:
-        args.output = Path.cwd() / f"{args.group_name}_processed.all"
-    return args
+    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
+    parser.add_argument("--stopwords", type=Path, default=DEFAULT_STOPWORDS)
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
