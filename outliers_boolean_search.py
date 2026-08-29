@@ -22,26 +22,19 @@ def load_index(index_path: Path):
             raise ValueError("Index file is empty.")
         header = first_line.split()
         if len(header) != 2:
-            raise ValueError(
-                "Invalid index header. "
-                "Expected: <vocabulary_size> <max_docid>"
-            )
+            raise ValueError("Invalid index header. Expected: <vocabulary_size> <max_docid>")
         try:
             vocabulary_size = int(header[0])
             max_docid = int(header[1])
         except ValueError:
-            raise ValueError(
-                "Vocabulary size and maximum document ID must be integers."
-            )
+            raise ValueError("Vocabulary size and maximum document ID must be integers.")
         for line_number, raw_line in enumerate(file, start=2):
             line = raw_line.strip()
             if not line:
                 continue
             parts = line.split(maxsplit=1)
             if len(parts) != 2:
-                raise ValueError(
-                    f"Invalid index entry at line {line_number}: {line!r}"
-                )
+                raise ValueError(f"Invalid index entry at line {line_number}: {line!r}")
             term = parts[0]
             postings_string = parts[1]
             try:
@@ -50,16 +43,10 @@ def load_index(index_path: Path):
                     for docid in postings_string.split(",")
                 ]
             except ValueError:
-                raise ValueError(
-                    f"Invalid postings list at line {line_number}"
-                )
-
+                raise ValueError(f"Invalid postings list at line {line_number}")
             # Verify that the postings list is sorted
             if postings != sorted(postings):
-                raise ValueError(
-                    f"Postings list for '{term}' is not sorted."
-                )
-
+                raise ValueError(f"Postings list for '{term}' is not sorted.")
             index[term] = postings
     # Check whether vocabulary size agrees with index file
     if len(index) != vocabulary_size:
