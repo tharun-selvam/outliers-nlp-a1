@@ -6,7 +6,6 @@ import sys
 import unicodedata
 from pathlib import Path
 from typing import Iterable
-
 from outliers_porter import PorterStemmer
 
 
@@ -23,14 +22,14 @@ WORD_RE = re.compile(r"[a-z]+")
 NUMBER_RE = re.compile(r"\d+(?:\.\d+)?")
 FIELD_TAGS = {".T", ".A", ".B", ".W"}
 
-
+#Tokenization
 def tokenize(text: str) -> list[str]:
     text = unicodedata.normalize("NFKC", text)
     # Preserve numeric value before punctuation becomes a boundary.
     text = THOUSANDS_COMMA_RE.sub("", text)
     return RAW_TOKEN_RE.findall(text)
 
-
+#Normalization
 def normalize(tokens: Iterable[str]) -> list[str]:
     normalized = []
     for token in tokens:
@@ -44,15 +43,15 @@ def normalize(tokens: Iterable[str]) -> list[str]:
             normalized.append(value)
     return normalized
 
-
+#Stemming Tokens
 def stem_tokens(tokens: Iterable[str], stemmer: PorterStemmer) -> list[str]:
     return [stemmer.stem(token) if WORD_RE.fullmatch(token) else token for token in tokens]
 
-
+#Removing stopwords
 def remove_stopwords(tokens: Iterable[str], stemmed_stopwords: set[str]) -> list[str]:
     return [token for token in tokens if token not in stemmed_stopwords]
 
-
+#Loading stemmed stopwords
 def load_stemmed_stopwords(path: Path, stemmer: PorterStemmer) -> set[str]:
     words = set()
     with path.open(encoding="utf-8") as source:
@@ -68,10 +67,10 @@ def load_stemmed_stopwords(path: Path, stemmer: PorterStemmer) -> set[str]:
                 raise ValueError(f"duplicate stop word at {path}:{line_number}: {word}")
             words.add(word)
 
-    # Documents and stop words must be compared after the same stemming step.
+    #Documents and stopwords must be compared after the same stemming step.
     return set(stem_tokens(words, stemmer))
 
-
+#Finish documents
 def _finish_document(
     doc_id: int,
     title_lines: list[str],
@@ -85,7 +84,7 @@ def _finish_document(
         raise ValueError(f"document {doc_id} has no .W section")
     return doc_id, " ".join(title_lines + abstract_lines)
 
-
+#Parse documents
 def parse_documents(path: Path) -> list[tuple[int, str]]:
     documents = []
     current_id: int | None = None
@@ -159,7 +158,7 @@ def parse_documents(path: Path) -> list[tuple[int, str]]:
         raise ValueError("expected sequential document IDs from 1 through 1400")
     return documents
 
-
+#Preprocess Text
 def preprocess_text(
     text: str,
     stemmer: PorterStemmer,
@@ -170,7 +169,7 @@ def preprocess_text(
     tokens = stem_tokens(tokens, stemmer)
     return remove_stopwords(tokens, stemmed_stopwords)
 
-
+#Preprocess collection
 def preprocess_collection(
     input_path: Path,
     stopwords_path: Path,
@@ -196,7 +195,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     return parser.parse_args(argv)
 
-
+#Main function 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     try:
