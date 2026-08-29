@@ -10,17 +10,17 @@ from outliers_porter import PorterStemmer
 
 
 base_directory = Path(__file__).resolve().parent
-GROUP_NAME = "outliers"
-DEFAULT_INPUT = base_directory / "cran.all.1400"
-DEFAULT_STOPWORDS = base_directory / "stopwords.txt"
-DEFAULT_OUTPUT = base_directory / f"{GROUP_NAME}_processed.all"
-EXPECTED_DOCUMENT_IDS = list(range(1, 1401))
+group = "outliers"
+input_default = base_directory / "cran.all.1400"
+stopwords_default = base_directory / "stopwords.txt"
+output_default = base_directory / f"{group}_processed.all"
+document_id_expected = list(range(1, 1401))
 DOCUMENT_ID_RE = re.compile(r"\.I\s+(\d+)")
 THOUSANDS_COMMA_RE = re.compile(r"(?<=\d),(?=\d{3}(?:\D|$))")
 RAW_TOKEN_RE = re.compile(r"[A-Za-z]+(?:['’][A-Za-z]+)*['’]?|\d+(?:\.\d+)?")
 WORD_RE = re.compile(r"[a-z]+")
 NUMBER_RE = re.compile(r"\d+(?:\.\d+)?")
-FIELD_TAGS = {".T", ".A", ".B", ".W"}
+field_tags = {".T", ".A", ".B", ".W"}
 
 #Tokenization
 def tokenize(text: str) -> list[str]:
