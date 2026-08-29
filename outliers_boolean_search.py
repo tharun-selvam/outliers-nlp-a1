@@ -5,10 +5,10 @@ import sys
 from outliers_porter import PorterStemmer
 from outliers_preprocess import tokenize, normalize, stem_tokens
 
-BASE_DIR = Path(__file__).resolve().parent
-GROUP_NAME = "outliers"
-DEFAULT_INDEX = BASE_DIR / f"{GROUP_NAME}_cran.index"
-DEFAULT_OUTPUT = BASE_DIR / f"{GROUP_NAME}_boolean_results.txt"
+base_directory = Path(__file__).resolve().parent
+group = "outliers"
+index_default = base_directory / f"{group}_cran.index"
+output_default = base_directory / f"{group}_boolean_results.txt"
 
 
 #Loading Inverted Index
@@ -210,32 +210,11 @@ def write_results(result, output_path: Path):
 
 #CLI
 def parse_args(argv=None):
-    parser = argparse.ArgumentParser(
-        description=(
-            "Perform two-term Boolean retrieval "
-            "over the Cranfield inverted index."
-        )
-    )
-    parser.add_argument(
-        "--index",
-        type=Path,
-        default=DEFAULT_INDEX,
-        help="Path to the Cranfield inverted index.",
-    )
-    parser.add_argument(
-        "--output",
-        type=Path,
-        default=DEFAULT_OUTPUT,
-        help="File in which matching document IDs are written.",
-    )
-    parser.add_argument(
-        "--query",
-        type=str,
-        default=None,
-        help='Boolean query such as "aircraft AND pressure".',
-    )
+    parser = argparse.ArgumentParser(description=("Perform two term Boolean retrieval over the Cranfield inverted index."))
+    parser.add_argument("--index", type=Path, default=index_default, help="Path to the Cranfield inverted index.",)
+    parser.add_argument("--output", type=Path, default=output_default, help="File in which matching document IDs are written.",)
+    parser.add_argument("--query", type=str, default=None, help='Boolean query such as "aircraft AND pressure"',)
     return parser.parse_args(argv)
-
 
 #Main function
 def main(argv=None):
