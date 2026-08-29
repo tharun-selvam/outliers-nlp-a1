@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Iterable
 from outliers_porter import PorterStemmer
 
-
 base_directory = Path(__file__).resolve().parent
 group = "outliers"
 input_default = base_directory / "cran.all.1400"
@@ -25,10 +24,9 @@ field_tags = {".T", ".A", ".B", ".W"}
 #Tokenization
 def tokenize(text: str) -> list[str]:
     text = unicodedata.normalize("NFKC", text)
-    # Preserve numeric value before punctuation becomes a boundary.
     text = THOUSANDS_COMMA_RE.sub("", text)
     return RAW_TOKEN_RE.findall(text)
-
+    
 #Normalization
 def normalize(tokens: Iterable[str]) -> list[str]:
     normalized = []
@@ -66,18 +64,10 @@ def load_stemmed_stopwords(path: Path, stemmer: PorterStemmer) -> set[str]:
             if word in words:
                 raise ValueError(f"duplicate stop word at {path}:{line_number}: {word}")
             words.add(word)
-
-    #Documents and stopwords must be compared after the same stemming step.
     return set(stem_tokens(words, stemmer))
 
 #Finish documents
-def _finish_document(
-    doc_id: int,
-    title_lines: list[str],
-    abstract_lines: list[str],
-    saw_title: bool,
-    saw_abstract: bool,
-) -> tuple[int, str]:
+def _finish_document(doc_id: int, title_lines: list[str], abstract_lines: list[str], saw_title: bool, saw_abstract: bool,) -> tuple[int, str]:
     if not saw_title:
         raise ValueError(f"document {doc_id} has no .T section")
     if not saw_abstract:
@@ -99,18 +89,9 @@ def parse_documents(path: Path) -> list[tuple[int, str]]:
             line = raw_line.rstrip("\r\n")
             marker = line.strip()
             id_match = DOCUMENT_ID_RE.fullmatch(marker)
-
             if id_match:
                 if current_id is not None:
-                    documents.append(
-                        _finish_document(
-                            current_id,
-                            title_lines,
-                            abstract_lines,
-                            saw_title,
-                            saw_abstract,
-                        )
-                    )
+                    documents.append(_finish_document(current_id, title_lines, abstract_lines, saw_title,saw_abstract,))
                 current_id = int(id_match.group(1))
                 section = None
                 title_lines = []
@@ -118,19 +99,15 @@ def parse_documents(path: Path) -> list[tuple[int, str]]:
                 saw_title = False
                 saw_abstract = False
                 continue
-
             if current_id is None:
                 if marker:
                     raise ValueError(f"text before first document at {path}:{line_number}")
                 continue
-
             if section == "abstract":
-                # Stray tag-only lines in three abstracts do not end the section.
-                if marker in FIELD_TAGS:
+                if marker in field_tags:
                     continue
                 abstract_lines.append(line)
                 continue
-
             if marker == ".T":
                 section = "title"
                 saw_title = True
@@ -141,79 +118,52 @@ def parse_documents(path: Path) -> list[tuple[int, str]]:
                 saw_abstract = True
             elif section == "title":
                 title_lines.append(line)
-
     if current_id is not None:
         documents.append(
-            _finish_document(
-                current_id,
-                title_lines,
-                abstract_lines,
-                saw_title,
-                saw_abstract,
-            )
-        )
-
+            _finish_document(current_id, title_lines, abstract_lines, saw_title, saw_abstract,))
     document_ids = [doc_id for doc_id, _ in documents]
-    if document_ids != EXPECTED_DOCUMENT_IDS:
-        raise ValueError("expected sequential document IDs from 1 through 1400")
+    if document_ids != document_id_expected:
+        raise ValueError("Expected a sequential document ID of 1 to 1400")
     return documents
 
 #Preprocess Text
-def preprocess_text(
-    text: str,
-    stemmer: PorterStemmer,
-    stemmed_stopwords: set[str],
-) -> list[str]:
+def preprocess_text(text: str, stemmer: PorterStemmer, stemmed_stopwords: set[str],) -> list[str]:
     tokens = tokenize(text)
     tokens = normalize(tokens)
     tokens = stem_tokens(tokens, stemmer)
     return remove_stopwords(tokens, stemmed_stopwords)
 
 #Preprocess collection
-def preprocess_collection(
-    input_path: Path,
-    stopwords_path: Path,
-    output_path: Path,
-) -> tuple[int, int]:
+def preprocess_collection(input_path: Path, stopwords_path: Path, output_path: Path,) -> tuple[int, int]:
     stemmer = PorterStemmer()
     stemmed_stopwords = load_stemmed_stopwords(stopwords_path, stemmer)
     documents = parse_documents(input_path)
-
     with output_path.open("w", encoding="utf-8", newline="\n") as output:
         for doc_id, text in documents:
             tokens = preprocess_text(text, stemmer, stemmed_stopwords)
             output.write(f".I {doc_id}\n.S\n")
             output.write(" ".join(tokens) + "\n")
-
     return len(documents), len(stemmed_stopwords)
-
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Preprocess the Cranfield collection.")
-    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
-    parser.add_argument("--stopwords", type=Path, default=DEFAULT_STOPWORDS)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--input", type=Path, default=input_default)
+    parser.add_argument("--stopwords", type=Path, default=stopwords_default)
+    parser.add_argument("--output", type=Path, default=output_default)
     return parser.parse_args(argv)
 
 #Main function 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     try:
-        document_count, stopword_count = preprocess_collection(
-            args.input,
-            args.stopwords,
-            args.output,
-        )
+        document_count, stopword_count = preprocess_collection(args.input, args.stopwords, args.output,)
     except (OSError, UnicodeError, ValueError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
-
     print(
         f"processed {document_count} documents with {stopword_count} stop-word stems "
         f"into {args.output}"
     )
     return 0
-
-
 if __name__ == "__main__":
     raise SystemExit(main())
