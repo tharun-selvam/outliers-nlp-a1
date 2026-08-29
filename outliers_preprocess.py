@@ -9,11 +9,11 @@ from typing import Iterable
 from outliers_porter import PorterStemmer
 
 
-BASE_DIR = Path(__file__).resolve().parent
+base_directory = Path(__file__).resolve().parent
 GROUP_NAME = "outliers"
-DEFAULT_INPUT = BASE_DIR / "cran.all.1400"
-DEFAULT_STOPWORDS = BASE_DIR / "stopwords.txt"
-DEFAULT_OUTPUT = BASE_DIR / f"{GROUP_NAME}_processed.all"
+DEFAULT_INPUT = base_directory / "cran.all.1400"
+DEFAULT_STOPWORDS = base_directory / "stopwords.txt"
+DEFAULT_OUTPUT = base_directory / f"{GROUP_NAME}_processed.all"
 EXPECTED_DOCUMENT_IDS = list(range(1, 1401))
 DOCUMENT_ID_RE = re.compile(r"\.I\s+(\d+)")
 THOUSANDS_COMMA_RE = re.compile(r"(?<=\d),(?=\d{3}(?:\D|$))")
