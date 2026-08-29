@@ -1,16 +1,15 @@
 from pathlib import Path
 import sys
 
-BASE_DIR = Path(__file__).resolve().parent
-GROUP_NAME = "outliers"
-DEFAULT_INPUT = BASE_DIR / f"{GROUP_NAME}_processed.all"
-DEFAULT_OUTPUT = BASE_DIR / f"{GROUP_NAME}_cran.index"
-EXPECTED_DOCUMENT_COUNT = 1400
+base_directory = Path(__file__).resolve().parent
+group_name = "outliers"
+input_default = base_directory / f"{group_name}_processed.all"
+output_default = base_directory / f"{group_name}_cran.index"
+document_count_expected = 1400
 
 def read_processed_file(input_path:Path):
     # Inverted index
     index = {}
-    # The document currently being processed
     current_docid = None
     # Keep track of document IDs
     seen_docids = set()
@@ -68,9 +67,9 @@ def read_processed_file(input_path:Path):
         raise ValueError("Input file ended after .S without a token line")
     if not seen_docids:
         raise ValueError("Input file contains no documents")
-    if len(seen_docids) != EXPECTED_DOCUMENT_COUNT:
-        raise ValueError(f"Expected {EXPECTED_DOCUMENT_COUNT} documents, but found {len(seen_docids)}")
-    expected_ids = set(range(1, EXPECTED_DOCUMENT_COUNT + 1))
+    if len(seen_docids) != document_count_expected:
+        raise ValueError(f"Expected {document_count_expected} documents, but found {len(seen_docids)}")
+    expected_ids = set(range(1, document_count_expected + 1))
     if seen_docids != expected_ids:
         raise ValueError("Document IDs are not exactly 1 through 1400")
     # maximum document ID
@@ -99,7 +98,7 @@ def create_index(input_filename:Path, output_filename:Path):
     write_index_file(index, max_docid, output_filename)
 def main()->int:
     try:
-        create_index(DEFAULT_INPUT,DEFAULT_OUTPUT)
+        create_index(input_default,output_default)
     except Exception as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 1
