@@ -207,6 +207,9 @@ def parse_args(argv=None):
 def main(argv=None):
     args = parse_args(argv)
     try:
+        index, vocabulary_size, max_docid = load_index(
+            args.index
+        )
         if args.query is None:
             query = input(
                 "Enter Boolean query "
